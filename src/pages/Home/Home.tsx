@@ -1,6 +1,8 @@
 import React from "react";
 import moment from "moment";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Wrapper from "../../styledcomponents/wrapper";
+import Header from "../../styledcomponents/header";
 // import "./App.scss";
 
 let createWeeks = (birthdate: number[]) => {
@@ -60,18 +62,18 @@ let Week: Function = (props: any): JSX.Element => {
   return (
     <div className="container">
       <div className="month_name">
-        {arrangedMonthName.map(name => {
-          return <div>{name}</div>;
+        {arrangedMonthName.map((name, key) => {
+          return <div key={key}>{name}</div>;
         })}
       </div>
       {data.map((years, i) => {
         return (
-          <div className="year_container">
+          <div key={i} className="year_container">
             <div className="age">{i} - </div>
-            {years.map(months => (
-              <div className="month_container">
-                {months.map(weeks => (
-                  <div className="week_container">
+            {years.map((months, key) => (
+              <div key={key} className="month_container">
+                {months.map((weeks, key) => (
+                  <div key={key} className="week_container">
                     <div
                       className="week"
                       style={{ backgroundColor: weeks.color }}
@@ -90,8 +92,8 @@ let Week: Function = (props: any): JSX.Element => {
 
 function Home() {
   return (
-    <div className="App">
-      <header>
+    <Wrapper>
+      <Header>
         <Link to="/tasks">
           <div className="tasks">Tasks</div>
         </Link>
@@ -99,9 +101,9 @@ function Home() {
           <div className="Title">MY LIFE IN WEEKS</div>
         </Link>
         <div className="logout">Logout</div>
-      </header>
+      </Header>
       <Week></Week>
-    </div>
+    </Wrapper>
   );
 }
 
