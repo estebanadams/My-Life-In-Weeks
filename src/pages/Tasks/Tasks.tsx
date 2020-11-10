@@ -1,55 +1,16 @@
 import React, { useState } from "react";
-import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import styled from "styled-components";
 
 import Wrapper from "../../styledcomponents/wrapper";
 import Header from "../../styledcomponents/header";
 import Day from "../../styledcomponents/day";
+import DayTaskList from "./components/DayTaskList";
+import TaskContainer from "./components/TaskContainer";
 
 const FlexWrapper = styled.div`
   display: flex;
   overflow-x: auto;
-`;
-
-const TasksContainer = styled.div`
-  max-width: 100%;
-  border: 1px solid red;
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const AddTask = styled.div<{ show: boolean }>`
-  ${props => !props.show && `display:none;`}
-  color: white;
-  background-color: black;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 3px;
-  font-weight: 600;
-`;
-
-const Task = styled.div`
-  border: 1px solid grey;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 3px;
-`;
-
-const CheckTask = styled.div`
-  border: 1px solid grey;
-  margin: 10px;
-  border-radius: 3px;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-`;
-
-const CreateNewTask = styled.input<{ show: boolean }>`
-  ${props => !props.show && `display:none;`}
-  border: 1px solid grey;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 3px;
 `;
 
 const DayTitle = styled.div`
@@ -79,30 +40,7 @@ const initialState = {
   ]
 };
 
-let handleEnterPress = (
-  e: React.KeyboardEvent,
-  state: any,
-  setState: any,
-  newTask: string,
-  setNewTask: any,
-  setShowNewTask: any
-) => {
-  if (e.key === "Enter") {
-    let newstate = { ...state };
-    let newtaskId = "task-" + (state.tasksId.length + 1);
-    console.log(newtaskId);
-    newstate.task[newtaskId] = { id: newtaskId, content: newTask };
-    newstate.tasksId.push(newtaskId);
-
-    setState(newstate);
-    setNewTask("");
-    setShowNewTask(true);
-  }
-};
-
 let Tasks = () => {
-  let [showNewTask, setShowNewTask] = useState(true);
-  let [newTask, setNewTask] = useState("");
   let [state, setState] = useState<any>(initialState);
 
   let { days, tasksId, task } = state;
@@ -158,102 +96,13 @@ let Tasks = () => {
     <Wrapper>
       <Header>Tasks</Header>
       <DragDropContext onDragEnd={onDragEnd}>
-        <TasksContainer>
-          <Droppable droppableId="tasks">
-            {provided => (
-              <div
-                style={{ display: "flex" }}
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {tasksId.map((t: string, key: number) => (
-                  <Draggable draggableId={t} index={key} key={key}>
-                    {(provided: any) => (
-                      <Task
-                        key={key}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        {task[t].content}
-                      </Task>
-                    )}
-                  </Draggable>
-                  // <Task key={key}>{task[t].content}</Task>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+        <TaskContainer state={state} />
 
-          <AddTask
-            onClick={() => {
-              setShowNewTask(false);
-            }}
-            show={showNewTask}
-          >
-            + NEW TASK +
-          </AddTask>
-          <CreateNewTask
-            value={newTask}
-            onChange={e => setNewTask(e.target.value)}
-            onKeyPress={e =>
-              handleEnterPress(
-                e,
-                state,
-                setState,
-                newTask,
-                setNewTask,
-                setShowNewTask
-              )
-            }
-            show={!showNewTask}
-          ></CreateNewTask>
-        </TasksContainer>
         <FlexWrapper>
-          {days.map((day: any, keys: number) => (
-            <Day key={keys}>
+          {days.map((day: any, key: number) => (
+            <Day key={key}>
               <DayTitle>{day.title}</DayTitle>
-              <Droppable droppableId={keys.toString()}>
-                {(provided: any) => (
-                  <div
-                    style={{ border: "1px solid red", height: "500px" }}
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
-                    {day.tasks.map((task: any, key: number) => (
-                      <Draggable
-                        draggableId={task.id}
-                        index={key}
-                        key={task.id}
-                      >
-                        {(provided: any) => (
-                          <CheckTask
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <div style={{ padding: "10px" }}>
-                              {task.content}
-                            </div>
-
-                            <input
-                              type="checkbox"
-                              style={{
-                                width: "25px",
-                                height: "25px",
-                                marginTop: "7px",
-                                marginRight: "7px"
-                              }}
-                            />
-                          </CheckTask>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
+              <DayTaskList dayKey={key} day={day} />
             </Day>
           ))}
         </FlexWrapper>

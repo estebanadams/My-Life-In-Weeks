@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.scss";
 import Home from "./pages/Home/Home";
 import Tasks from "./pages/Tasks/Tasks";
+import { Reset } from "styled-reset";
 
 function App() {
   return (
