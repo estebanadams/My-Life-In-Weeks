@@ -3,7 +3,7 @@ import { message } from "antd";
 
 const serviceLogin = (mail: string, pass: string) => {
   signin(mail, pass)
-    .then(res => message.success("Login success"))
+    .then(res => console.log("success"))
     .catch(err => console.log(err));
 };
 

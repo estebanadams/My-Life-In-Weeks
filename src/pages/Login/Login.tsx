@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import loginService from "../../services/login";
+import { useAuthState } from "react-firebase-hooks/auth";
+import firebase from "../../services/firebase";
 
 const LoginContainer = styled.div`
   margin: auto;
@@ -43,6 +45,10 @@ const Button = styled.button`
 const Login = () => {
   let [mail, setMail] = useState("");
   let [pass, setPass] = useState("");
+
+  const [user, loading, error] = useAuthState(firebase.auth());
+  if (user) return <Redirect to={{ pathname: "/" }}></Redirect>;
+
   return (
     <LoginContainer>
       <Title>Login</Title>

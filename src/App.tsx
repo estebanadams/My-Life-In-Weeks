@@ -19,7 +19,7 @@ function App() {
         <Route path="/register" exact>
           <Register />
         </Route>
-        <PrivateRoute path="/" component={Home} />
+        <PrivateRoute path="/" component={Home} exact />
         <PrivateRoute path="/tasks" component={Tasks} />
       </Switch>
     </Router>
