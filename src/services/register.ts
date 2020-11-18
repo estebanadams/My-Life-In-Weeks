@@ -1,4 +1,5 @@
 import { signup, db } from "./firebase";
+import { create_initial_state } from "./task";
 
 const serviceRegister = (
   mail: string,
@@ -23,6 +24,7 @@ const serviceRegister = (
           uid: user.uid,
           birthdate
         });
+      create_initial_state(user.uid);
     })
     .catch(err => console.log(err));
 };

@@ -2,12 +2,13 @@ import React, { useState } from "react";
 
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import styled from "styled-components";
+import { update_task_state } from "../../../services/task";
+import { useDispatch, useSelector } from "react-redux";
 
 import { FaTimesCircle } from "react-icons/fa";
 
 const TasksContainer = styled.div`
   max-width: 100%;
-  border: 1px solid red;
   display: flex;
   flex-wrap: wrap;
 `;
@@ -45,46 +46,57 @@ const CreateNewTask = styled.input<{ show: boolean }>`
 
 let handleEnterPress = (
   e: React.KeyboardEvent,
+  uid: string,
   state: any,
-  // setState: any,
+  dispatch: any,
   newTask: string,
   setNewTask: any,
   setShowNewTask: any
 ) => {
   if (e.key === "Enter") {
     let newstate = { ...state };
-    let newtaskId = "task-" + (state.tasksId.length + 1);
+    let newtaskId = "task-" + (state.task.length + 1);
     console.log(newtaskId);
-    newstate.task[newtaskId] = { id: newtaskId, content: newTask };
-    newstate.tasksId.push(newtaskId);
+    newstate.task.push({ id: newtaskId, content: newTask });
+    // newstate.tasksId.push(newtaskId);
 
-    // setState(newstate);
+    dispatch({ type: "SET_TASK", payload: newstate });
     setNewTask("");
     setShowNewTask(true);
   }
 };
 
-type T_TaskContainer = {
-  state: any;
+let removeTask = (dispatch: any, key: number, state: any) => {
+  state.task.splice(key, 1);
+  console.log("STAte", state.task);
+  dispatch({ type: "SET_TASK", payload: state });
 };
 
-let TaskContainer = ({ state }: T_TaskContainer) => {
+type T_TaskContainer = {
+  state: any;
+  setState: any;
+};
+
+let TaskContainer = () => {
   let [showNewTask, setShowNewTask] = useState(true);
   let [newTask, setNewTask] = useState("");
+  const state = useSelector((state: any) => state.task);
+  const user = useSelector((state: any) => state.user);
+  const dispatch = useDispatch();
 
   let { tasksId, task } = state;
 
   return (
-    <TasksContainer>
+    <>
       <Droppable droppableId="tasks">
         {provided => (
-          <div
+          <TasksContainer
             style={{ display: "flex" }}
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {tasksId.map((t: string, key: number) => (
-              <Draggable draggableId={t} index={key} key={key}>
+            {task.map((t: any, key: number) => (
+              <Draggable draggableId={key.toString()} index={key} key={key}>
                 {(provided: any) => (
                   <Task
                     key={key}
@@ -92,43 +104,46 @@ let TaskContainer = ({ state }: T_TaskContainer) => {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                   >
-                    <DeleteTask>
+                    <DeleteTask
+                      onClick={() => removeTask(dispatch, key, state)}
+                    >
                       <FaTimesCircle></FaTimesCircle>
                     </DeleteTask>
-                    {task[t].content}
+                    {t.content}
                   </Task>
                 )}
               </Draggable>
             ))}
             {provided.placeholder}
-          </div>
+
+            <AddTask
+              onClick={() => {
+                setShowNewTask(false);
+              }}
+              show={showNewTask}
+            >
+              + NEW TASK +
+            </AddTask>
+            <CreateNewTask
+              value={newTask}
+              onChange={e => setNewTask(e.target.value)}
+              onKeyPress={e =>
+                handleEnterPress(
+                  e,
+                  user.uid,
+                  state,
+                  dispatch,
+                  newTask,
+                  setNewTask,
+                  setShowNewTask
+                )
+              }
+              show={!showNewTask}
+            ></CreateNewTask>
+          </TasksContainer>
         )}
       </Droppable>
-
-      <AddTask
-        onClick={() => {
-          setShowNewTask(false);
-        }}
-        show={showNewTask}
-      >
-        + NEW TASK +
-      </AddTask>
-      <CreateNewTask
-        value={newTask}
-        onChange={e => setNewTask(e.target.value)}
-        onKeyPress={e =>
-          handleEnterPress(
-            e,
-            state,
-            // setState,
-            newTask,
-            setNewTask,
-            setShowNewTask
-          )
-        }
-        show={!showNewTask}
-      ></CreateNewTask>
-    </TasksContainer>
+    </>
   );
 };
 

@@ -1,6 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styled from "styled-components";
+import {
+  check_if_taskState_exist,
+  create_initial_state,
+  update_task_state,
+  get_task_state
+} from "../../services/task";
 
 import Wrapper from "../../styledcomponents/wrapper";
 import Header from "../../styledcomponents/header";
@@ -20,33 +28,28 @@ const DayTitle = styled.div`
   padding: 20px;
 `;
 
-const initialState = {
-  task: {
-    "task-1": { id: "task-1", content: "Read" },
-    "task-2": { id: "task-2", content: "Workout" },
-    "task-3": { id: "task-3", content: "Meditate" },
-    "task-4": { id: "task-4", content: "Work" },
-    "task-5": { id: "task-5", content: "Chill" }
-  },
-  tasksId: ["task-1", "task-2", "task-3", "task-4", "task-5"],
-  days: [
-    { title: "Monday", taskIds: ["task-1", "task-2"], tasks: [] },
-    { title: "Tuesday", taskIds: ["task-1", "task-2"], tasks: [] },
-    { title: "Wednesday", taskIds: ["task-1", "task-2"], tasks: [] },
-    { title: "Thursday", taskIds: ["task-1", "task-2"], tasks: [] },
-    { title: "Friday", taskIds: ["task-1", "task-2"], tasks: [] },
-    { title: "Saturday", taskIds: ["task-1", "task-2"], tasks: [] },
-    { title: "Sunday", taskIds: ["task-1", "task-2"], tasks: [] }
-  ]
-};
-
 let Tasks = () => {
-  let [state, setState] = useState<any>(initialState);
+  const state = useSelector((state: any) => state.task);
+  const user = useSelector((state: any) => state.user);
+  const dispatch = useDispatch();
+  console.log("USER", user, "DISTPATCH", state);
+  useEffect(() => {
+    if (user)
+      get_task_state(user.uid).then((r: any) =>
+        dispatch({ type: "SET_TASK", payload: r })
+      );
+  }, [user]);
 
-  let { days, tasksId, task } = state;
+  useEffect(() => {
+    if (user && state) update_task_state(user.uid, state);
+  }, [state]);
+  if (!state || !user) return null;
+  let { days, task } = state;
 
   let onDragEnd = (result: any) => {
     const { destination, source, draggableId } = result;
+
+    if (destination.droppableId === "tasks") return;
 
     console.log(
       "dest",
@@ -66,11 +69,10 @@ let Tasks = () => {
       newtasklist.splice(destination.index, 0, tmp);
       state.days[parseInt(source.droppableId)].tasks = newtasklist;
       console.log(newtasklist);
-      setState(state);
+      // update_task_state(user.uid, state);
+      dispatch({ type: "SET_TASK", payload: state });
       return;
     }
-    if (destination.droppableId === "tasks") return;
-    if (source.droppableId !== "tasks") return;
 
     if (source) {
       let randomId =
@@ -82,21 +84,28 @@ let Tasks = () => {
           .substring(2, 15);
       let t = {
         id: randomId,
-        content: state.task[draggableId].content
+        content: state.task[parseInt(draggableId)].content,
+        checked: false
       };
-      state.days[parseInt(destination.droppableId)].taskIds.push(draggableId);
-      state.days[parseInt(destination.droppableId)].tasks.push(t);
+      state.days[parseInt(destination.droppableId)].tasks.splice(
+        destination.index,
+        0,
+        t
+      );
       console.log(t);
-      setState(state);
+      dispatch({ type: "SET_TASK", payload: state });
+      // update_task_state(user.uid, state);
       return;
     }
   };
 
   return (
     <Wrapper>
-      <Header>Tasks</Header>
+      <Header>
+        <Link to="/">Home</Link>Tasks
+      </Header>
       <DragDropContext onDragEnd={onDragEnd}>
-        <TaskContainer state={state} />
+        <TaskContainer />
 
         <FlexWrapper>
           {days.map((day: any, key: number) => (
