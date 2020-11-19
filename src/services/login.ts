@@ -1,5 +1,4 @@
 import { signin } from "./firebase";
-import { message } from "antd";
 
 const serviceLogin = (mail: string, pass: string) => {
   signin(mail, pass)

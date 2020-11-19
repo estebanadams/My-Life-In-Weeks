@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext } from "react-beautiful-dnd";
 import styled from "styled-components";
-import {
-  check_if_taskState_exist,
-  create_initial_state,
-  update_task_state,
-  get_task_state
-} from "../../services/task";
+import { update_task_state, get_task_state } from "../../services/task";
 
 import Wrapper from "../../styledcomponents/wrapper";
 import Header from "../../styledcomponents/header";
@@ -38,13 +33,13 @@ let Tasks = () => {
       get_task_state(user.uid).then((r: any) =>
         dispatch({ type: "SET_TASK", payload: r })
       );
-  }, [user]);
+  }, [user, dispatch]);
 
   useEffect(() => {
     if (user && state) update_task_state(user.uid, state);
-  }, [state]);
+  }, [state, user]);
   if (!state || !user) return null;
-  let { days, task } = state;
+  let { days } = state;
 
   let onDragEnd = (result: any) => {
     const { destination, source, draggableId } = result;

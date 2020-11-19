@@ -46,7 +46,7 @@ const Login = () => {
   let [mail, setMail] = useState("");
   let [pass, setPass] = useState("");
 
-  const [user, loading, error] = useAuthState(firebase.auth());
+  const [user] = useAuthState(firebase.auth());
   if (user) return <Redirect to={{ pathname: "/" }}></Redirect>;
 
   return (

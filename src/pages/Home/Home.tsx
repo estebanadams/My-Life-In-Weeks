@@ -43,7 +43,7 @@ let createWeeks = (birthdate: number[], task: any) => {
       let month = [];
       while (j < 4) {
         let future = i * 52 + y + j > diff;
-        let current_week = i * 52 + y + j == diff;
+        let current_week = i * 52 + y + j === diff;
         if (future) month.push({ color: "white" });
         else if (current_week)
           month.push({ color: "#2ecc71" + current_week_score(task) });
@@ -101,7 +101,7 @@ let Week: Function = (props: any) => {
               <div key={key} className="month_container">
                 {months.map((weeks: any, key: number) => (
                   <div key={key} className="week_container">
-                    {weeks.color == "white" ? (
+                    {weeks.color === "white" ? (
                       <div
                         className="week"
                         style={{
@@ -146,7 +146,7 @@ function Home() {
       get_task_state(user.uid).then((r: any) =>
         dispatch({ type: "SET_TASK", payload: r })
       );
-  }, [user]);
+  }, [user, dispatch]);
   useEffect(() => {
     if (!weeks && task) {
       let data = createWeeks([1997, 8, 11], task);
@@ -154,7 +154,7 @@ function Home() {
     }
 
     console.log("HOME");
-  }, [task]);
+  }, [task, dispatch, weeks]);
   return (
     <Wrapper>
       <Header>

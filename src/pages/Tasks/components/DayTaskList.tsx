@@ -1,5 +1,5 @@
 import React from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Droppable, Draggable } from "react-beautiful-dnd";
 import { FaTimesCircle } from "react-icons/fa";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";

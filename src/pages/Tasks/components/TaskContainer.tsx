@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { update_task_state } from "../../../services/task";
 import { useDispatch, useSelector } from "react-redux";
 
 import { FaTimesCircle } from "react-icons/fa";
@@ -84,7 +83,7 @@ let TaskContainer = () => {
   const user = useSelector((state: any) => state.user);
   const dispatch = useDispatch();
 
-  let { tasksId, task } = state;
+  let { task } = state;
 
   return (
     <>

@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 const PrivateRoute = ({ component: Component, ...rest }: any) => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const [user, loading, error] = useAuthState(firebase.auth());
+  const [user, loading] = useAuthState(firebase.auth());
 
   useEffect(() => {
     if (user) {
@@ -16,7 +16,7 @@ const PrivateRoute = ({ component: Component, ...rest }: any) => {
         payload: { uid: user.uid, email: user.email }
       });
     }
-  }, user);
+  }, [user, dispatch]);
   // console.log("PrivateRoute", user, loading, error);
 
   if (loading) return <div>Auth Loading</div>;
