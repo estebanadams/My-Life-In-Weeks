@@ -163,7 +163,7 @@ function Home() {
   }, [user, dispatch]);
   useEffect(() => {
     if (!weeks && task) {
-      createWeeks("11/08/1997", task, user.uid).then(data =>
+      createWeeks(user.birthday, task, user.uid).then(data =>
         dispatch({ type: "SET_WEEKS", payload: data })
       );
     }
@@ -173,7 +173,7 @@ function Home() {
   useEffect(() => {
     if (weeks && task && user) {
       console.log(user, weeks, task);
-      let res = newWeek("11/08/1997", user.uid, task);
+      let res = newWeek(user.birthday, user.uid, task);
       res.then(r => {
         if (r) {
           update_task_state(user.uid, { ...task });

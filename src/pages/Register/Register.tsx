@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import serviceRegister from "../../services/register";
+import { useAuthState } from "react-firebase-hooks/auth";
+import firebase from "../../services/firebase";
 
 const RegisterContainer = styled.div`
   margin: auto;
@@ -45,6 +47,9 @@ const Register = () => {
   let [pass, setPass] = useState("");
   let [pass2, setPass2] = useState("");
   let [birthdate, setBirthdate] = useState("");
+
+  const [user] = useAuthState(firebase.auth());
+  if (user) return <Redirect to={{ pathname: "/" }}></Redirect>;
 
   return (
     <RegisterContainer>

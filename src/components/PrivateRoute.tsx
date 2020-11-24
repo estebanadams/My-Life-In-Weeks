@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
-import firebase from "../services/firebase";
+import firebase, { db } from "../services/firebase";
 import { useDispatch } from "react-redux";
 
 const PrivateRoute = ({ component: Component, ...rest }: any) => {
@@ -11,9 +11,22 @@ const PrivateRoute = ({ component: Component, ...rest }: any) => {
 
   useEffect(() => {
     if (user) {
-      dispatch({
-        type: "SET_USER",
-        payload: { uid: user.uid, email: user.email }
+      let userDataRef = db
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+      userDataRef.then(res => {
+        let data = res.data();
+        if (data)
+          dispatch({
+            type: "SET_USER",
+            payload: {
+              uid: user.uid,
+              email: user.email,
+              birthdate: data.birthdate
+            }
+          });
       });
     }
   }, [user, dispatch]);
