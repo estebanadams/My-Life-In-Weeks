@@ -6,7 +6,11 @@ import Wrapper from "../../styledcomponents/wrapper";
 import Header from "../../styledcomponents/header";
 import { auth } from "../../services/firebase";
 import { get_task_state } from "../../services/task";
-// import "./App.scss";
+import {
+  newWeek,
+  update_task_state,
+  getOldWeeksScore
+} from "../../services/task";
 
 let current_week_score = (state: any) => {
   let day = moment().isoWeekday();
@@ -18,18 +22,35 @@ let current_week_score = (state: any) => {
   while (i < day) {
     let j = 0;
     while (j < state.days[i].tasks.length) {
-      if (state.days[i].tasks[j].checked) task_done++;
+      if (state.days[i].tasks[j].checked === true) task_done++;
       total_task++;
       j++;
     }
     i++;
   }
-  return Math.round((task_done / total_task) * 100);
+  return Math.round((task_done / total_task) * 100) - 1;
 };
 
-let createWeeks = (birthdate: number[], task: any) => {
-  const livespan = 100;
+let getCurrentWeek = (birthdate: number[]) => {
   let birth = moment(birthdate);
+  let now = moment();
+  let diff = now.diff(birth, "weeks");
+  return diff;
+};
+
+let scoreForOldWeek = (oldWeeksScore: any[], currWeek: number) => {
+  for (let week of oldWeeksScore) {
+    if (week.currentWeek === currWeek) return week.weekScore;
+  }
+  return -1;
+};
+
+let createWeeks = async (birthdate: string, task: any, uid: string) => {
+  const livespan = 100;
+  let oldWeekScore = await getOldWeeksScore(uid);
+
+  console.log("OLDWEEKS", oldWeekScore);
+  let birth = moment(birthdate, "DD/MM/YYYY");
   let now = moment();
   let diff = now.diff(birth, "weeks");
   console.log(diff);
@@ -38,16 +59,29 @@ let createWeeks = (birthdate: number[], task: any) => {
   while (i < livespan) {
     let y = 0;
     let year = [];
-    while (y < 48) {
+    while (y < 52) {
       let j = 0;
       let month = [];
       while (j < 4) {
         let future = i * 52 + y + j > diff;
         let current_week = i * 52 + y + j === diff;
         if (future) month.push({ color: "white" });
-        else if (current_week)
-          month.push({ color: "#2ecc71" + current_week_score(task) });
-        else month.push({ color: "grey" });
+        else if (current_week) {
+          console.log(
+            "CURRENT WEEK",
+            diff,
+            current_week_score(task),
+            i * 52 + y + j
+          );
+          if (current_week_score(task) < 10)
+            month.push({ color: "#2ecc710" + current_week_score(task) });
+          else month.push({ color: "#2ecc71" + current_week_score(task) });
+        } else if (scoreForOldWeek(oldWeekScore, i * 52 + y + j) !== -1) {
+          let score = scoreForOldWeek(oldWeekScore, i * 52 + y + j);
+
+          console.log("OLDWEEK", score, diff, i * 52 + y + j, month);
+          month.push({ color: "#2ecc71" + score });
+        } else month.push({ color: "grey" });
         j++;
       }
       year.push(month);
@@ -56,7 +90,7 @@ let createWeeks = (birthdate: number[], task: any) => {
     years.push(year);
     i++;
   }
-  console.log(years);
+  console.log("CREATE WEEKS ", years);
   return years;
 };
 
@@ -65,34 +99,14 @@ let Week: Function = (props: any) => {
   let data = useSelector((state: any) => state.weeks);
 
   if (!data) return null;
-  let monthName: string[] = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Otc",
-    "Nov",
-    "Dec"
-  ];
-  let arrangedMonthName = [];
-  let i = 0;
-  while (i < monthName.length) {
-    if (bornMonth + i > monthName.length) bornMonth = -i + 1;
-    arrangedMonthName.push(monthName[bornMonth + i - 1]);
-    i++;
-  }
+
   return (
     <div className="container">
-      <div className="month_name">
+      {/* <div className="month_name">
         {arrangedMonthName.map((name, key) => {
           return <div key={key}>{name}</div>;
         })}
-      </div>
+      </div> */}
       {data.map((years: any, i: number) => {
         return (
           <div key={i} className="year_container">
@@ -149,12 +163,26 @@ function Home() {
   }, [user, dispatch]);
   useEffect(() => {
     if (!weeks && task) {
-      let data = createWeeks([1997, 8, 11], task);
-      dispatch({ type: "SET_WEEKS", payload: data });
+      createWeeks("11/08/1997", task, user.uid).then(data =>
+        dispatch({ type: "SET_WEEKS", payload: data })
+      );
     }
 
     console.log("HOME");
-  }, [task, dispatch, weeks]);
+  }, [task, dispatch, weeks, user]);
+  useEffect(() => {
+    if (weeks && task && user) {
+      console.log(user, weeks, task);
+      let res = newWeek("11/08/1997", user.uid, task);
+      res.then(r => {
+        if (r) {
+          update_task_state(user.uid, { ...task });
+          dispatch({ type: "SET_TASK", payload: { ...task } });
+          console.log("FULL DATA LOADED", r);
+        }
+      });
+    }
+  }, [user, task, dispatch, weeks]);
   return (
     <Wrapper>
       <Header>

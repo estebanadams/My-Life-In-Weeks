@@ -44,6 +44,7 @@ let Tasks = () => {
   let onDragEnd = (result: any) => {
     const { destination, source, draggableId } = result;
 
+    if (destination === null) return;
     if (destination.droppableId === "tasks") return;
 
     console.log(
@@ -69,7 +70,7 @@ let Tasks = () => {
       return;
     }
 
-    if (source) {
+    if (source.droppableId === "tasks") {
       let randomId =
         Math.random()
           .toString(36)
@@ -88,6 +89,20 @@ let Tasks = () => {
         t
       );
       console.log(t);
+      dispatch({ type: "SET_TASK", payload: state });
+      // update_task_state(user.uid, state);
+      return;
+    }
+    if (source) {
+      let t = state.days[parseInt(source.droppableId)].tasks.splice(
+        source.index,
+        1
+      );
+      state.days[parseInt(destination.droppableId)].tasks.splice(
+        destination.index,
+        0,
+        t[0]
+      );
       dispatch({ type: "SET_TASK", payload: state });
       // update_task_state(user.uid, state);
       return;

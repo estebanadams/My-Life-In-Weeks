@@ -24,7 +24,7 @@ const serviceRegister = (
           uid: user.uid,
           birthdate
         });
-      create_initial_state(user.uid);
+      create_initial_state(user.uid, birthdate);
     })
     .catch(err => console.log(err));
 };
