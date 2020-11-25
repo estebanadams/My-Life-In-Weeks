@@ -28,6 +28,8 @@ let current_week_score = (state: any) => {
     }
     i++;
   }
+  console.log("Task done / all task", task_done, total_task, state);
+
   return Math.round((task_done / total_task) * 100) - 1;
 };
 
@@ -162,8 +164,8 @@ function Home() {
       );
   }, [user, dispatch]);
   useEffect(() => {
-    if (!weeks && task) {
-      createWeeks(user.birthday, task, user.uid).then(data =>
+    if (!weeks && task && user) {
+      createWeeks(user.birthdate, task, user.uid).then(data =>
         dispatch({ type: "SET_WEEKS", payload: data })
       );
     }
@@ -173,7 +175,7 @@ function Home() {
   useEffect(() => {
     if (weeks && task && user) {
       console.log(user, weeks, task);
-      let res = newWeek(user.birthday, user.uid, task);
+      let res = newWeek(user.birthdate, user.uid, task);
       res.then(r => {
         if (r) {
           update_task_state(user.uid, { ...task });
