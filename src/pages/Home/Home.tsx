@@ -32,7 +32,6 @@ let Week: Function = (props: any) => {
                       ></div>
                     ) : (
                       <div
-                        role="text"
                         title={weeks.score}
                         className="week"
                         style={{
