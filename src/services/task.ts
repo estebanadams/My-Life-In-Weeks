@@ -19,7 +19,7 @@ let getCurrentWeek = (birthdate: string): number => {
 };
 
 let current_week_score = (state: any) => {
-  let day = moment().isoWeekday();
+  // let day = moment().isoWeekday();
   console.log(state);
   let i = 0;
 
@@ -57,12 +57,12 @@ export const newWeek = async (
   currentTask: any
 ) => {
   let currentWeek = getCurrentWeek(birthdate);
-  let userRef = await db
-    .collection("users")
-    .doc(uid)
-    .collection("taskState")
-    .doc("data")
-    .get();
+  // let userRef = await db
+  //   .collection("users")
+  //   .doc(uid)
+  //   .collection("taskState")
+  //   .doc("data")
+  //   .get();
 
   let oldWeeksRef = await db
     .collection("users")
@@ -73,7 +73,7 @@ export const newWeek = async (
     .doc(uid)
     .collection("oldWeeksScore");
 
-  let userData = userRef.data();
+  // let userData = userRef.data();
   if (currentTask.currentWeek !== currentWeek) {
     oldWeeksRef.doc(currentTask.currentWeek.toString()).set(currentTask);
     oldWeeksScoreRef.doc(currentTask.currentWeek.toString()).set({

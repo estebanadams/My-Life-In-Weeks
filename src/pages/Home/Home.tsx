@@ -1,114 +1,20 @@
 import React, { useEffect } from "react";
-import moment from "moment";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Wrapper from "../../styledcomponents/wrapper";
 import Header from "../../styledcomponents/header";
 import { auth } from "../../services/firebase";
 import { get_task_state } from "../../services/task";
-import {
-  newWeek,
-  update_task_state,
-  getOldWeeksScore
-} from "../../services/task";
-
-let current_week_score = (state: any) => {
-  let day = moment().isoWeekday();
-  console.log(state);
-  let i = 0;
-
-  let total_task = 0;
-  let task_done = 0;
-  while (i < day) {
-    let j = 0;
-    while (j < state.days[i].tasks.length) {
-      if (state.days[i].tasks[j].checked === true) task_done++;
-      total_task++;
-      j++;
-    }
-    i++;
-  }
-  console.log("Task done / all task", task_done, total_task, state);
-
-  return Math.round((task_done / total_task) * 100) - 1;
-};
-
-let getCurrentWeek = (birthdate: number[]) => {
-  let birth = moment(birthdate);
-  let now = moment();
-  let diff = now.diff(birth, "weeks");
-  return diff;
-};
-
-let scoreForOldWeek = (oldWeeksScore: any[], currWeek: number) => {
-  for (let week of oldWeeksScore) {
-    if (week.currentWeek === currWeek) return week.weekScore;
-  }
-  return -1;
-};
-
-let createWeeks = async (birthdate: string, task: any, uid: string) => {
-  const livespan = 100;
-  let oldWeekScore = await getOldWeeksScore(uid);
-
-  console.log("OLDWEEKS", oldWeekScore);
-  let birth = moment(birthdate, "DD/MM/YYYY");
-  let now = moment();
-  let diff = now.diff(birth, "weeks");
-  console.log(diff);
-  let years = [];
-  let i = 0;
-  while (i < livespan) {
-    let y = 0;
-    let year = [];
-    while (y < 52) {
-      let j = 0;
-      let month = [];
-      while (j < 4) {
-        let future = i * 52 + y + j > diff;
-        let current_week = i * 52 + y + j === diff;
-        if (future) month.push({ color: "white" });
-        else if (current_week) {
-          console.log(
-            "CURRENT WEEK",
-            diff,
-            current_week_score(task),
-            i * 52 + y + j
-          );
-          if (current_week_score(task) < 10)
-            month.push({ color: "#2ecc710" + current_week_score(task) });
-          else month.push({ color: "#2ecc71" + current_week_score(task) });
-        } else if (scoreForOldWeek(oldWeekScore, i * 52 + y + j) !== -1) {
-          let score = scoreForOldWeek(oldWeekScore, i * 52 + y + j);
-
-          console.log("OLDWEEK", score, diff, i * 52 + y + j, month);
-          month.push({ color: "#2ecc71" + score });
-        } else month.push({ color: "grey" });
-        j++;
-      }
-      year.push(month);
-      y += 4;
-    }
-    years.push(year);
-    i++;
-  }
-  console.log("CREATE WEEKS ", years);
-  return years;
-};
+import { newWeek, update_task_state } from "../../services/task";
+import { current_week_score, createWeeks } from "./helper";
 
 let Week: Function = (props: any) => {
-  let bornMonth = 8;
   let data = useSelector((state: any) => state.weeks);
 
   if (!data) return null;
 
   return (
     <div className="container">
-      {/* <div className="month_name">
-        {arrangedMonthName.map((name, key) => {
-          return <div key={key}>{name}</div>;
-        })}
-      </div> */}
       {data.map((years: any, i: number) => {
         return (
           <div key={i} className="year_container">
@@ -126,6 +32,8 @@ let Week: Function = (props: any) => {
                       ></div>
                     ) : (
                       <div
+                        role="text"
+                        title={weeks.score}
                         className="week"
                         style={{
                           backgroundColor: weeks.color,
@@ -142,7 +50,6 @@ let Week: Function = (props: any) => {
       })}
     </div>
   );
-  // return <div className="week"></div>;
 };
 
 const logout = () => {
